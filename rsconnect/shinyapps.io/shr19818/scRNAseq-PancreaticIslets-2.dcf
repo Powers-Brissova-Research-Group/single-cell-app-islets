@@ -1,0 +1,12 @@
+name: scRNAseq-PancreaticIslets-2
+title: scRNAseq-PancreaticIslets-2
+username:
+account: shr19818
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3296997
+bundleId: 3906218
+url: https://shr19818.shinyapps.io/scRNAseq-PancreaticIslets-2/
+when: 1606336733.55884
+asMultiple: FALSE
+asStatic: FALSE

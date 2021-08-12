@@ -59,8 +59,9 @@ ui<-dashboardPage(header,
                  #* Dashboard sidebar ----
                  dashboardSidebar(width = 250,
                                   sidebarMenu(
-                                    textInput(inputId = "Gene",
-                                              label = "Enter Official Gene Symbol"),
+                                    selectInput(inputId = "Gene",
+                                              label = "Enter Official Gene Symbol",
+                                              choices=rownames(Islets), selectize = TRUE),
                                     menuItem("Violinplot", tabName = "vlnplot", icon = icon("vp")),
                                     menuItem("Umap", tabName = "umap", icon = icon("ump")),
                                     menuItem("Dotplot", tabName = "dotplot", icon = icon("dp")),
@@ -124,7 +125,7 @@ ui<-dashboardPage(header,
                       #For dotplot tab
                       tabItem(tabName = "dotplot",
                               fluidPage(
-                                verticalLayout(tags$h6("Note: enter a gene that is not a cell type marker to avoid duplication in dotplot"),
+                                verticalLayout(tags$h6("Note: if you see an error, enter a gene that is not a cell type marker to avoid duplication in dotplot"),
                                                plotOutput("plot5")
                                                )
                                 )
@@ -248,12 +249,12 @@ server<-function(input, output)
   DotPlot(Islets, feature=c(Known.markers,toupper(input$Gene)), dot.scale = 8)+ 
     coord_flip()+ 
     scale_color_gradient2(low = "blue", high = "red",mid = "white")+
-    labs(y=" ", x="Genes", color = "Expression z-score")+RotatedAxis()+
+    labs(y="", x="Genes")+RotatedAxis()+
     #geom_point(shape = 21) +
     scale_y_discrete(position = "right") +
     theme_light() +
     guides(x =  guide_axis(angle = 45))+
-    guides(color = guide_colorbar(title = 'Mean Expression Z-score'))+
+    guides(color = guide_colorbar(title = 'Mean expression z-score'),size = guide_legend("% Cells expressed"))+
     theme(text = element_text(size = 15,face="bold"),
           axis.text = element_text(size = 15,face="bold"))
   
@@ -267,9 +268,9 @@ server<-function(input, output)
     tble<-ttt$data
     tble<-tble %>%rename(Gene= features.plot, 
                          CellType=id, 
-                         Mean_expression_zscore=avg.exp.scaled,
+                         'Mean expression z-score'=avg.exp.scaled,
                          '% Cells expressed'= pct.exp,
-                         Average_expression= avg.exp)
+                         'Average expression'= avg.exp)
     tble<-tble[ , c(3, 4, 2,1,5)]
     tble<-tble %>% filter_all(any_vars(. %in% toupper(input$Gene)))
     tble

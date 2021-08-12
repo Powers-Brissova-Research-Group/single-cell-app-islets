@@ -21,7 +21,21 @@ options(repos = BiocManager::repositories())
 
 #load data----
 load("DATA/Islets2.Rda")
-Gene_desp<-read.csv("DATA/annotation.csv",header = TRUE)
+
+#Fetch gene id, gene description info from biomart
+# ensembl = useMart(
+#   "ensembl", 
+#   host = "uswest.ensembl.org",
+#   dataset = "hsapiens_gene_ensembl" )
+# Gene_desp <- getBM( attributes = c("ensembl_gene_id",'hgnc_symbol', "description",'gene_biotype', 'chromosome_name', 'start_position', 'end_position','source'),
+#                   filters = "hgnc_symbol",
+#                   values = rownames(Islets),
+#                   mart = ensembl,
+#                   useCache = FALSE)
+#write.csv(Gene_desp, "DATA/biomart_annotation.csv")
+
+#saved the output to csv
+Gene_desp<-read.csv("DATA/biomart_annotation.csv",header = TRUE, row.names = 1)
 
 
 #Single-cell gene expression atlas of human pancreatic islets
@@ -59,9 +73,9 @@ ui<-dashboardPage(header,
                  #* Dashboard sidebar ----
                  dashboardSidebar(width = 250,
                                   sidebarMenu(
-                                    selectInput(inputId = "Gene",
+                                    selectizeInput(inputId = "Gene",
                                               label = "Enter Official Gene Symbol",
-                                              choices=rownames(Islets), selectize = TRUE),
+                                              options = list(placeholder='Enter Gene'),choices=NULL),
                                     menuItem("Violinplot", tabName = "vlnplot", icon = icon("vp")),
                                     menuItem("Umap", tabName = "umap", icon = icon("ump")),
                                     menuItem("Dotplot", tabName = "dotplot", icon = icon("dp")),
@@ -154,13 +168,14 @@ ui<-dashboardPage(header,
 
 
 #3.Server----
-server<-function(input, output) 
+server<-function(input, output,session) 
   
 #* table 1 -Gene Description----
 {
+  updateSelectizeInput(session, 'Gene', choices = rownames(Islets), server = TRUE)
   output$table1<-renderTable({
     req(input$Gene)
-    rownames(Gene_desp) <- make.names(Gene_desp[,1], unique = TRUE)
+    #rownames(Gene_desp) <- make.names(Gene_desp[,1], unique = TRUE)
     Gene_desp[toupper(input$Gene),]
     })
 

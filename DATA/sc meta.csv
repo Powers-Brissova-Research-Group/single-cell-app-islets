@@ -1,27 +1,22 @@
-Biosource,
 Organism,Homo sapiens
 Tissue,isolated pancreatic islets
-Age,14-66y
+Age,14-66years
 Donor,5
 Sex,M/F
 Disease status,healthy
-Single cell Isolation,
-Tissue dissociation,proteolysis
+Tissue dissociation,manual pipetting using 0.025% trypsin 
 Cell enrichment,None
-Single cell Isolation,"droplet-based cell isolation, 10X"
+Single cell Isolation,"droplet-based cell isolation, 10X Chromium"
 Single cell entity,Whole cell
 Cell number,"~10,000 input cells per donor(3 technical rep per donor)"
 Cell number(post QC),"44,953"
-single cell library preparation,
 Library construction,10X v2
 Input molecule,polyA RNA
 Primer,oligo-dT
 Amplification method,PCR
 Amplification cycles,14
 End bias,3 prime tag
-cDNA read,read1
 Spike In,None
-Sequencing assay,
 Library layout,paired-end
-Instrument model,Illumina NovaSeq 6000
+Sequencer,Illumina NovaSeq 6000
 Reads,"~146,000 reads per cell"

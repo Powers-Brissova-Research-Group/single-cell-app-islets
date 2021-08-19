@@ -11,6 +11,7 @@ library(shinythemes)
 library(shinydashboard)
 library(shinyBS)
 library(dittoSeq)
+library(readr)
 
 #Might need this to deploy----
 library(BiocManager)
@@ -19,8 +20,25 @@ options(repos = BiocManager::repositories())
 #load data----
 load("DATA/Islets2.Rda")
 
-#load Gene description
-Gene_desp<-read.csv("DATA/biomart_annotation.csv",header = TRUE, row.names = 1)
+# #Extract Gene description
+# ref<-read_tsv("DATA/refdata-cellranger-GRCh38-1.2.0/Homo_sapiens.GRCh38.84_gene_annotation_table.txt")
+# 
+# #fetch gene id info from bioomart
+# ensembl = useMart(
+#   "ensembl",
+#   host = "uswest.ensembl.org",
+#   dataset = "hsapiens_gene_ensembl" )
+# genemap <- getBM( attributes = c("ensembl_gene_id",'hgnc_symbol', "description",'gene_biotype', 'chromosome_name', 'start_position', 'end_position','source'),
+#                     filters = "ensembl_gene_id",
+#                     values = ref$gene_id,
+#                     mart = ensembl,
+#                     useCache = FALSE)
+# 
+# idx <- match( rownames(Islets), genemap$hgnc_symbol)
+# Islets_ensembl <- genemap[ idx, ]
+
+Gene_desp<-read.csv("DATA/biomart_annotation.csv")
+
 
 #load experimental summary for table3:
 t3<-read.csv("DATA/sc meta.csv")
@@ -70,7 +88,7 @@ ui<-dashboardPage(header,
                                   sidebarMenu(
                                     selectizeInput(inputId = "Gene",
                                               label = "Enter Official Gene Symbol",
-                                              options = list(placeholder='INS GCG'),choices=NULL),
+                                              options = list(placeholder='INS'),choices=NULL),
                                     menuItem("Violinplot", tabName = "vlnplot", icon = icon("vp")),
                                     menuItem("Umap", tabName = "umap", icon = icon("ump")),
                                     menuItem("Dotplot", tabName = "dotplot", icon = icon("dp")),
@@ -154,10 +172,11 @@ ui<-dashboardPage(header,
                       tabItem(tabName = "expsum",
                               fluidPage(
                                 verticalLayout(br(),
+                                               tags$h3(HTML(paste0("<b>","Single Cell RNA-seq Metadata","</b>")) ),
                                                tableOutput("table3")
-                                )
+                                              )
+                                       )
                               )
-                      ),
                       
                       
     
@@ -291,6 +310,7 @@ server<-function(input, output,session)
   
 #* Table3 (Experimental Summary) ----
   output$table3<-renderTable({
+    names(t3) <- NULL
     t3
     
     

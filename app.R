@@ -15,54 +15,49 @@ library(dittoSeq)
 #Might need this to deploy----
 library(BiocManager)
 options(repos = BiocManager::repositories())
-#options(repos = BiocInstaller::biocinstallRepos())
-#options(repos = c("CRAN" = "https://cran.rstudio.com/", "BioCsoft" = "https://bioconductor.org/packages/3.8/bioc", "BioCann" = "https://bioconductor.org/packages/3.8/data/annotation"))
-#getOption("repos")
 
 #load data----
 load("DATA/Islets2.Rda")
 
-#Fetch gene id, gene description info from biomart
-# ensembl = useMart(
-#   "ensembl", 
-#   host = "uswest.ensembl.org",
-#   dataset = "hsapiens_gene_ensembl" )
-# Gene_desp <- getBM( attributes = c("ensembl_gene_id",'hgnc_symbol', "description",'gene_biotype', 'chromosome_name', 'start_position', 'end_position','source'),
-#                   filters = "hgnc_symbol",
-#                   values = rownames(Islets),
-#                   mart = ensembl,
-#                   useCache = FALSE)
-#write.csv(Gene_desp, "DATA/biomart_annotation.csv")
-
-#saved the output to csv
+#load Gene description
 Gene_desp<-read.csv("DATA/biomart_annotation.csv",header = TRUE, row.names = 1)
 
+#load experimental summary for table3:
+t3<-read.csv("DATA/sc meta.csv")
 
 #Single-cell gene expression atlas of human pancreatic islets
 
 #1.Header----
 header <- dashboardHeader(titleWidth = "100%",
-  # Set height of dashboardHeader
-  tags$li(class = "dropdown",
-          tags$style(".main-header {max-height: 100px}"),
-          tags$style(".main-header .logo {height: 60px}")))
+                          # Set height of dashboardHeader
+                          tags$li(class = "dropdown",
+                                  tags$style(".main-header {max-height: 130px}"),
+                                  tags$style(".main-header .logo {height: 60px}")
+                                  )
+                          )
 
 
-#add powerslab webpage link to the powerslab image
-anchor <- tags$li(a(href='https://www.powersbrissovaresearch.org/',
-                 tags$img(src='logo-4.png', height='60', width='200'),
-                 'Single cell gene expression atlas of human pancreatic islets',
-                 style = "color: #4292C6;
-                          font-family: Avenir Light;
-                          font-size: 40px;
-                          padding-top:10px; padding-bottom:10px;
-                          font-weight: bold"))
+#webpage links to the images
+anchor <- tags$header(tags$a(href='https://www.powersbrissovaresearch.org/',
+                      tags$img(src='logo-4.png', height='50', width='220',style="float:left;" )),
+                      #style = "padding-top:100px; padding-bottom:100px;"),
+                      'Single cell gene expression atlas of human pancreatic islets',
+                          style = "color: #4292C6;
+                           float:center;
+                           font-family: Avenir Light;
+                           font-size: 40px;
+                           padding-top:10px; padding-bottom:10px;
+                           font-weight: bold",
+                      tags$a(href='https://cds.vanderbilt.edu/',
+                      tags$img(src='CDS-logo-600x85.png', height='50', width='300',style="float:right"))
+                      )
 
 
-header$children[[2]]$children[[2]] <-tags$div( align="left",#height='50px',
-                                               tags$head(tags$style(HTML(".name { background-color: white }"))),
-                                               anchor,
-                                               class = 'name')
+header$children[[2]]$children <- tags$div(
+                                        tags$head(tags$style(HTML(".name { background-color: white }"))),
+                                        anchor,
+                                        class = 'name')
+
 
 #2.User Interface----
 
@@ -75,16 +70,13 @@ ui<-dashboardPage(header,
                                   sidebarMenu(
                                     selectizeInput(inputId = "Gene",
                                               label = "Enter Official Gene Symbol",
-                                              options = list(placeholder='Enter Gene'),choices=NULL),
+                                              options = list(placeholder='INS GCG'),choices=NULL),
                                     menuItem("Violinplot", tabName = "vlnplot", icon = icon("vp")),
                                     menuItem("Umap", tabName = "umap", icon = icon("ump")),
                                     menuItem("Dotplot", tabName = "dotplot", icon = icon("dp")),
                                     menuItem("Expression values", tabName = "cellno", icon = icon("cellno")),
                                     menuItem("Manuscript", icon = icon("Manuscript"), href ="https://www.biorxiv.org/content/10.1101/2021.02.23.432522v1"),
-                                    tipify(menuItem("Experimental Summary", tabName = "Con"),"Explore gene expression level across pancreatic islet cell types from total of 44,953 single cells.Data derived from droplet based 10x Chromium single cell libraries sequenced on NovaSeq 100bp PE resulting in ~146,000 reads per cell.",
-                                           placement="bottom", trigger = "hover"),
-                                    tipify(menuItem("Contact Us", tabName = "Con"),"shristi.shrestha@vumc.org",
-                                           placement="bottom", trigger = "hover")
+                                    menuItem("Experimental Summary", tabName = "expsum", icon = icon("ES"))
                   )
                 ),
                 
@@ -159,10 +151,15 @@ ui<-dashboardPage(header,
                               h2(plotOutput("manuscript"))
                               ),
                       
-                      #Add Contact us email
-                      tabItem(tabName = "contactus",
-                              h2(plotOutput("contactus"))
+                      tabItem(tabName = "expsum",
+                              fluidPage(
+                                verticalLayout(br(),
+                                               tableOutput("table3")
+                                )
                               )
+                      ),
+                      
+                      
     
     )))
 
@@ -172,11 +169,11 @@ server<-function(input, output,session)
   
 #* table 1 -Gene Description----
 {
-  updateSelectizeInput(session, 'Gene', choices = rownames(Islets), server = TRUE)
+  updateSelectizeInput(session, 'Gene', choices = sort(Gene_desp$hgnc_symbol), server = TRUE)
   output$table1<-renderTable({
     req(input$Gene)
-    #rownames(Gene_desp) <- make.names(Gene_desp[,1], unique = TRUE)
-    Gene_desp[toupper(input$Gene),]
+    #Gene_desp[toupper(input$Gene),]
+    Gene_desp %>% filter(hgnc_symbol == input$Gene)
     })
 
 
@@ -290,7 +287,14 @@ server<-function(input, output,session)
     tble<-tble %>% filter_all(any_vars(. %in% toupper(input$Gene)))
     tble
   })
+
   
+#* Table3 (Experimental Summary) ----
+  output$table3<-renderTable({
+    t3
+    
+    
+  })
 }
 
 

@@ -12,7 +12,6 @@ library(shinythemes)
 library(shinydashboard)
 library(shinyBS)
 library(dittoSeq)
-library(readr)
 library(shinyWidgets)
 
 #Might need this to deploy----
@@ -39,7 +38,7 @@ load("DATA/Islets2.Rda")
 # idx <- match( rownames(Islets), genemap$hgnc_symbol)
 # Islets_ensembl <- genemap[ idx, ]
 
-Gene_desp<-read.csv("DATA/biomart_annotation.csv")
+Gene_desp<-read.csv("DATA/gene_annotation.csv")
 
 
 #load experimental summary for table3:
@@ -51,7 +50,7 @@ t3<-read.csv("DATA/sc meta.csv")
 header <- dashboardHeader(titleWidth = "100%",
                           # Set height of dashboardHeader
                           tags$li(class = "dropdown",
-                                  tags$style(".main-header {max-height: 160px}"),
+                                  tags$style(".main-header {max-height: 200px}"),
                                   tags$style(".main-header .logo {height: 100px}")
                           )
 )
@@ -60,14 +59,14 @@ header <- dashboardHeader(titleWidth = "100%",
 #webpage links to the images
 anchor <- tags$header(
               tags$a(href='https://www.powersbrissovaresearch.org/',
-                             tags$img(src='logo-4.png', width='240',style="float:left; padding:10px 20px;" )),
+                             tags$img(src='logo-4.png', width='240',style="float:left; padding:10px 30px;" )),
                       #style = "padding-top:100px; padding-bottom:100px;"),
                       'Single cell gene expression atlas of human pancreatic islets',
                       style = "color: #2b6cb3;
-                           float:center;
+                           float:left;
                            /*font-family: Avenir Light;*/
                            font-size: 30px;
-                           padding:10px;
+                           padding:20px;
                            font-weight: bold"
 )
 
@@ -89,12 +88,13 @@ ui<-dashboardPage(header,
                                  
                                   sidebarMenu(
                                     id = "tabs",
-                                    menuItem("Home", tabName = "home", selected = T, icon = icon("vp")),
+                                    menuItem("Home", tabName = "home", selected = T),
                                     menuItem(
                                              startExpanded = TRUE,
                                       selectizeInput(inputId = "Gene",
                                                      label = "Enter Official Gene Symbol",
-                                                     choices=NULL)         
+                                                     choices=NULL
+                                                     )         
                                       ),
                                     
                                     menuItem("Violinplot", tabName = "vlnplot", icon = icon("vp")),
@@ -147,7 +147,7 @@ ui<-dashboardPage(header,
           	                                               hr(),
           	                                               tags$h4("This app provides interactive access to our single cell RNA-Seq data that is reported in:"),
           	                                               tags$div(
-          	                                                 HTML("<p><u>Combinatorial transcription factor profiles predict mature and functional human islet α and β cells.</u> Shristi Shrestha, Diane C. Saunders, John T. Walker, Joan Camunas-Soler, Xiao-Qing Dai, Rachana Haliyur, Radhika Aramandla, Greg Poffenberger, Nripesh Prasad, Rita Bottino, Roland Stein, Jean-Philippe Cartailler, Stephen C. J. Parker, Patrick E. MacDonald, Shawn E. Levy, Alvin C. Powers, Marcela Brissova, <b>bioRxiv</b> 2021.02.23.432522; doi: https://doi.org/10.1101/2021.02.23.432522<blockquote style='font-size:90%'>Islet-enriched transcription factors (TFs) exert broad control over cellular processes in pancreatic α and β cells and changes in their expression are associated with developmental state and diabetes. However, the implications of heterogeneity in TF expression across islet cell populations are not well understood. To define this TF heterogeneity and its consequences for cellular function, we profiled >40,000 cells from normal human islets by scRNA-seq and stratified α and β cells based on combinatorial TF expression. Subpopulations of islet cells co-expressing ARX/MAFB (α cells) and MAFA/MAFB (β cells) exhibited greater expression of key genes related to glucose sensing and hormone secretion relative to subpopulations expressing only one or neither TF. Moreover, all subpopulations were identified in native pancreatic tissue from multiple donors. By Patch-seq, MAFA/MAFB co-expressing β cells showed enhanced electrophysiological activity. Thus, these results indicate combinatorial TF expression in islet α and β cells predicts highly functional, mature subpopulations.</blockquote>
+          	                                                 HTML("<p style = 'font-size:20px;'><u><b>Combinatorial transcription factor profiles predict mature and functional human islet α and β cells.</u></b><br></p> Shristi Shrestha*, Diane C. Saunders*, John T. Walker*, Joan Camunas-Soler, Xiao-Qing Dai, Rachana Haliyur, Radhika Aramandla, Greg Poffenberger, Nripesh Prasad, Rita Bottino, Roland Stein, Jean-Philippe Cartailler, Stephen C. J. Parker, Patrick E. MacDonald, Shawn E. Levy, Alvin C. Powers, Marcela Brissova, <b>bioRxiv</b> 2021.02.23.432522; doi: https://doi.org/10.1101/2021.02.23.432522<br> *first co-authors <blockquote style='font-size:15px'> Abstract <br> Islet-enriched transcription factors (TFs) exert broad control over cellular processes in pancreatic α and β cells and changes in their expression are associated with developmental state and diabetes. However, the implications of heterogeneity in TF expression across islet cell populations are not well understood. To define this TF heterogeneity and its consequences for cellular function, we profiled >40,000 cells from normal human islets by scRNA-seq and stratified α and β cells based on combinatorial TF expression. Subpopulations of islet cells co-expressing ARX/MAFB (α cells) and MAFA/MAFB (β cells) exhibited greater expression of key genes related to glucose sensing and hormone secretion relative to subpopulations expressing only one or neither TF. Moreover, all subpopulations were identified in native pancreatic tissue from multiple donors. By Patch-seq, MAFA/MAFB co-expressing β cells showed enhanced electrophysiological activity. Thus, these results indicate combinatorial TF expression in islet α and β cells predicts highly functional, mature subpopulations.</blockquote>
           	                                                      
           	                                                      <div style='margin-top:200px'>
           	                                                      <a href='https://cds.vanderbilt.edu'><img src='CDS-logo-600x85.png' style='width:200px; height:auto; float:right'></a>
@@ -163,6 +163,7 @@ ui<-dashboardPage(header,
                                                            br(),
                                                            addSpinner(plotOutput("plot1"), spin = "dots", color = "#2b6cb3"),
                                                            plotOutput("plot2"),
+                                                           br(),br(),
                                                            sidebarPanel(
                                                              sliderInput("Cellsize", 
                                                                          "Increase Cell Size:",
@@ -173,6 +174,10 @@ ui<-dashboardPage(header,
                                                                          animate=TRUE),
                                                              hr(),
                                                              helpText("set to -1 to remove dots(cells)")
+                                                             
+                                                             
+                                                             
+                                                             
                                                            )
                                             )
                                           )
@@ -184,7 +189,13 @@ ui<-dashboardPage(header,
                                             verticalLayout(tableOutput("table1_umap"),
                                                            br(),
                                                            addSpinner(plotOutput("plot3"), spin = "dots", color = "#2b6cb3"),
-                                                           addSpinner(plotOutput("plot4"), spin = "dots", color = "#2b6cb3")
+                                                           addSpinner(plotOutput("plot4"), spin = "dots", color = "#2b6cb3"),
+                                                           tags$div(
+                                                             HTML("
+          	                                                      <div style='margin-top:200px'>
+          	                                                      <a href='https://cds.vanderbilt.edu'><img src='CDS-logo-600x85.png' style='width:200px; height:auto; float:right'></a>
+          	                                                      </div>
+          	                                                      "))
                                             )
                                           )
                                   ),
@@ -219,7 +230,9 @@ ui<-dashboardPage(header,
                                           fluidPage(
                                             verticalLayout(br(),
                                                            tags$h3(HTML(paste0("<b>","Single Cell RNA-seq Metadata","</b>")) ),
-                                                           tableOutput("table3")
+                                                           tableOutput("table3"),
+                                                           tags$h6("Metadata format standardized according to",tags$a(href='https://www.nature.com/articles/s41587-020-00744-z',"Fullgrabe et al.,2020"))
+                                                                  
                                             )
                                           )
                                   )
@@ -275,7 +288,8 @@ server<-function(input, output,session)
               color.panel=c('Alpha'='#F8766D','Beta'='#39B600','Delta'='#D89000','Gamma'='#A3A500','Epsilon'='#00BF7D','Acinar'='#00BFC4','Ductal'='#00B0F6','Endothelial'='#9590FF','Stellate'='#E76BF3','Immune'='#FF62BC'),
               # change the color and size of jitter points
               jitter.color = "black", jitter.size = input$Cellsize,
-              
+              legend.title = "Cell types",
+              xlab = NULL,
               # change the outline color and width, and remove the fill of boxplots
               boxplot.color = "#636363", boxplot.width = 0.1,
               boxplot.fill = FALSE,
@@ -302,11 +316,11 @@ server<-function(input, output,session)
               
               # change the color and size of jitter points
               jitter.color = "black", jitter.size = input$Cellsize,
-              
+              legend.title = "Donor age",
+              xlab = NULL,
               # change the outline color and width, and remove the fill of boxplots
               boxplot.color = "#636363", boxplot.width = 0.1,
               boxplot.fill = FALSE,
-              legend.title = "Age",
               vlnplot.scaling = "width" 
     )+ylab("ln(UMI -per-10,000 +1)")+
       theme(text = element_text(size = 18,

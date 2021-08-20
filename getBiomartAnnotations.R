@@ -13,7 +13,7 @@ mart <- useEnsembl(biomart = "ensembl",
                    dataset = "hsapiens_gene_ensembl", 
                    version = "80")
 
-genemap <- getBM( attributes = c("ensembl_gene_id",'hgnc_symbol', "description",'gene_biotype', 'chromosome_name', 'start_position', 'end_position','source'),
+genemap <- getBM( attributes = c("ensembl_gene_id",'hgnc_symbol', "description",'gene_biotype', 'chromosome_name', 'start_position', 'end_position'),
                   filters = "ensembl_gene_id",
                   values = ref$gene_id,
                   mart = mart,
@@ -28,9 +28,13 @@ Islets_ensembl <- ref[ idx, ]
 
 # now, bind the biomart data
 idx2 <- match( Islets_ensembl$gene_id, genemap$ensembl_gene_id) 
-Islets_ensembl <- genemap[ idx, ]
+Islets_ensembl <- genemap[ idx2, ]
 
 # fill in empty symbols
 Islets_ensembl$hgnc_symbol <- ifelse(Islets_ensembl$hgnc_symbol == "", "No symbol available", Islets_ensembl$hgnc_symbol)
 
 # and save... as you'd like
+write.csv(Islets_ensembl, "DATA/gene_annotation.csv",row.names=FALSE)
+
+
+

@@ -110,7 +110,6 @@ ui<-dashboardPage(header,
       dashboardBody(
         useShinyjs(),
         
-        tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
         tags$head(tags$style(HTML('
                                             /* body */
                                             .content-wrapper, .right-side {
@@ -124,7 +123,8 @@ ui<-dashboardPage(header,
                                             .main-sidebar { font-size: 20px; }
                                             
                                             #Gene-label { font-size:70%;}
-
+                                            
+                                            "#image {max-width: 60%; width: 60%; height: auto; }"
                                             '))),
                                 
                                 
@@ -136,9 +136,9 @@ ui<-dashboardPage(header,
           	                              fluidPage(
           	                                verticalLayout(tags$h2("Welcome!"),
           	                                               hr(),
-          	                                               tags$p("This app provides interactive access to our single cell RNA-Seq data that is reported in:"),
-          	                                               tags$h3("Combinatorial transcription factor profiles predict mature and functional human islet α and β cells"),
-          	                                               tags$p("Islet-enriched transcription factors (TFs) exert broad control over cellular processes in pancreatic α and β cells and changes in their expression are associated with developmental state and diabetes. However, the implications of heterogeneity in TF expression across islet cell populations are not well understood. To define this TF heterogeneity and its consequences for cellular function, we profiled >40,000 cells from normal human islets by scRNA-seq and stratified α and β cells based on combinatorial TF expression. Subpopulations of islet cells co-expressing ARX/MAFB (α cells) and MAFA/MAFB (β cells) exhibited greater expression of key genes related to glucose sensing and hormone secretion relative to subpopulations expressing only one or neither TF. Moreover, all subpopulations were identified in native pancreatic tissue from multiple donors. By Patch-seq, MAFA/MAFB co-expressing β cells showed enhanced electrophysiological activity. Thus, these results indicate combinatorial TF expression in islet α and β cells predicts highly functional, mature subpopulations.")
+          	                                               tags$h4("This app provides interactive access to our single cell RNA-Seq data that is reported in:"),
+          	                                               tags$div(
+          	                                                 HTML("<p><u>Combinatorial transcription factor profiles predict mature and functional human islet α and β cells.</u> Shristi Shrestha, Diane C. Saunders, John T. Walker, Joan Camunas-Soler, Xiao-Qing Dai, Rachana Haliyur, Radhika Aramandla, Greg Poffenberger, Nripesh Prasad, Rita Bottino, Roland Stein, Jean-Philippe Cartailler, Stephen C. J. Parker, Patrick E. MacDonald, Shawn E. Levy, Alvin C. Powers, Marcela Brissova, <b>bioRxiv</b> 2021.02.23.432522; doi: https://doi.org/10.1101/2021.02.23.432522</p><blockquote style='font-size:90%'>Islet-enriched transcription factors (TFs) exert broad control over cellular processes in pancreatic α and β cells and changes in their expression are associated with developmental state and diabetes. However, the implications of heterogeneity in TF expression across islet cell populations are not well understood. To define this TF heterogeneity and its consequences for cellular function, we profiled >40,000 cells from normal human islets by scRNA-seq and stratified α and β cells based on combinatorial TF expression. Subpopulations of islet cells co-expressing ARX/MAFB (α cells) and MAFA/MAFB (β cells) exhibited greater expression of key genes related to glucose sensing and hormone secretion relative to subpopulations expressing only one or neither TF. Moreover, all subpopulations were identified in native pancreatic tissue from multiple donors. By Patch-seq, MAFA/MAFB co-expressing β cells showed enhanced electrophysiological activity. Thus, these results indicate combinatorial TF expression in islet α and β cells predicts highly functional, mature subpopulations.</blockquote>"))
           	                                )
           	                              )
           

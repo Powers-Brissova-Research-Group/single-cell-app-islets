@@ -3,6 +3,7 @@
 
 #Libraries----
 library(shiny)
+require(shinyjs)
 library(Seurat)
 library(ggplot2)
 library(Matrix)
@@ -72,7 +73,7 @@ anchor <- tags$header(tags$a(href='https://www.powersbrissovaresearch.org/',
 
 
 header$children[[2]]$children <- tags$div(
-  tags$head(tags$style(HTML(".name { background-color: white }"))),
+  tags$head(tags$style(HTML(".name { background-color: white } Gene-label { font-size:80%;} "))),
   anchor,
   class = 'name')
 
@@ -81,30 +82,36 @@ header$children[[2]]$children <- tags$div(
 
 #*  Dashboard header----
 ui<-dashboardPage(header,
-                  skin = "black",
                   
-                  #* Dashboard sidebar ----
-                  dashboardSidebar(width = 250,
-                                   sidebarMenu(
-                                     menuItem("Home", tabName = "home", selected = T, icon = icon("vp")),
-                                     menuItem(
-                                       startExpanded = TRUE,
-                                       selectizeInput(inputId = "Gene",
-                                                      label = "Enter Official Gene Symbol",
-                                                      options = list(placeholder='INS'),choices=NULL)         
-                                     ),
-                                     
-                                     menuItem("Violinplot", tabName = "vlnplot", icon = icon("vp")),
-                                     menuItem("Umap", tabName = "umap", icon = icon("ump")),
-                                     menuItem("Dotplot", tabName = "dotplot", icon = icon("dp")),
-                                     menuItem("Expression values", tabName = "cellno", icon = icon("cellno")),
-                                     menuItem("Manuscript", icon = icon("Manuscript"), href ="https://www.biorxiv.org/content/10.1101/2021.02.23.432522v1"),
-                                     menuItem("Experimental Summary", tabName = "expsum", icon = icon("ES"))
-                                   )
-                  ),
-                  
-                  #*  Dashboardbody----         
-                  dashboardBody(tags$head(tags$style(HTML('
+                 skin = "black",
+                 #* Dashboard sidebar ----
+                 dashboardSidebar(width = 250,
+                                 
+                                  sidebarMenu(
+                                    id = "tabs",
+                                    menuItem("Home", tabName = "home", selected = T, icon = icon("vp")),
+                                    menuItem(
+                                             startExpanded = TRUE,
+                                      selectizeInput(inputId = "Gene",
+                                                     label = "Enter Official Gene Symbol",
+                                                     choices=NULL)         
+                                      ),
+                                    
+                                    menuItem("Violinplot", tabName = "vlnplot", icon = icon("vp")),
+                                    menuItem("Umap", tabName = "umap", icon = icon("ump")),
+                                    menuItem("Dotplot", tabName = "dotplot", icon = icon("dp")),
+                                    menuItem("Expression values", tabName = "cellno", icon = icon("cellno")),
+                                    menuItem("Manuscript", icon = icon("Manuscript"), href ="https://www.biorxiv.org/content/10.1101/2021.02.23.432522v1"),
+                                    menuItem("Experimental Summary", tabName = "expsum", icon = icon("ES"))
+                  )
+                ),
+                
+#*  Dashboardbody----         
+      dashboardBody(
+        useShinyjs(),
+        
+        tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+        tags$head(tags$style(HTML('
                                             /* body */
                                             .content-wrapper, .right-side {
                                             background-color: #FFFFFF;
@@ -115,43 +122,42 @@ ui<-dashboardPage(header,
                                             }
 
                                             .main-sidebar { font-size: 20px; }
+                                            
+                                            #Gene-label { font-size:70%;}
 
                                             '))),
                                 
                                 
+                                mainPanel(tableOutput("table1")), # gene description table
+                                
                                 #For violinplot tab
                                 tabItems(
-                                  #For UMAP plot tab
-                                  tabItem(tabName = "home",
-                                          fluidPage(
-                                            verticalLayout(tags$h2("Welcome!"),
-                                                           hr(),
-                                                           tags$p("This app provides interactive access to our single cell RNA-Seq data that is reported in:"),
-                                                           tags$h3("Combinatorial transcription factor profiles predict mature and functional human islet α and β cells"),
-                                                           tags$p("Islet-enriched transcription factors (TFs) exert broad control over cellular processes in pancreatic α and β cells and changes in their expression are associated with developmental state and diabetes. However, the implications of heterogeneity in TF expression across islet cell populations are not well understood. To define this TF heterogeneity and its consequences for cellular function, we profiled >40,000 cells from normal human islets by scRNA-seq and stratified α and β cells based on combinatorial TF expression. Subpopulations of islet cells co-expressing ARX/MAFB (α cells) and MAFA/MAFB (β cells) exhibited greater expression of key genes related to glucose sensing and hormone secretion relative to subpopulations expressing only one or neither TF. Moreover, all subpopulations were identified in native pancreatic tissue from multiple donors. By Patch-seq, MAFA/MAFB co-expressing β cells showed enhanced electrophysiological activity. Thus, these results indicate combinatorial TF expression in islet α and β cells predicts highly functional, mature subpopulations.")
-                                            )
-                                          )
-                                          
-                                  ),
-                                  
+          	                      tabItem(tabName = "home",
+          	                              fluidPage(
+          	                                verticalLayout(tags$h2("Welcome!"),
+          	                                               hr(),
+          	                                               tags$p("This app provides interactive access to our single cell RNA-Seq data that is reported in:"),
+          	                                               tags$h3("Combinatorial transcription factor profiles predict mature and functional human islet α and β cells"),
+          	                                               tags$p("Islet-enriched transcription factors (TFs) exert broad control over cellular processes in pancreatic α and β cells and changes in their expression are associated with developmental state and diabetes. However, the implications of heterogeneity in TF expression across islet cell populations are not well understood. To define this TF heterogeneity and its consequences for cellular function, we profiled >40,000 cells from normal human islets by scRNA-seq and stratified α and β cells based on combinatorial TF expression. Subpopulations of islet cells co-expressing ARX/MAFB (α cells) and MAFA/MAFB (β cells) exhibited greater expression of key genes related to glucose sensing and hormone secretion relative to subpopulations expressing only one or neither TF. Moreover, all subpopulations were identified in native pancreatic tissue from multiple donors. By Patch-seq, MAFA/MAFB co-expressing β cells showed enhanced electrophysiological activity. Thus, these results indicate combinatorial TF expression in islet α and β cells predicts highly functional, mature subpopulations.")
+          	                                )
+          	                              )
+          
+          	                      ),
                                   tabItem(tabName = "vlnplot", 
                                           fluidPage(
-                                            verticalLayout(
-                                              #For gene description table
-                                              mainPanel(tableOutput("table1")), 
-                                              plotOutput("plot1"),
-                                              plotOutput("plot2"),
-                                              sidebarPanel(
-                                                sliderInput("Cellsize", 
-                                                            "Increase Cell Size:",
-                                                            min=-1,
-                                                            max=1,
-                                                            value=0.1,
-                                                            step = 0.1,
-                                                            animate=TRUE),
-                                                hr(),
-                                                helpText("set to -1 to remove dots(cells)")
-                                              )
+                                            verticalLayout(plotOutput("plot1"),
+                                                           plotOutput("plot2"),
+                                                           sidebarPanel(
+                                                             sliderInput("Cellsize", 
+                                                                         "Increase Cell Size:",
+                                                                         min=-1,
+                                                                         max=1,
+                                                                         value=0.1,
+                                                                         step = 0.1,
+                                                                         animate=TRUE),
+                                                             hr(),
+                                                             helpText("set to -1 to remove dots(cells)")
+                                                           )
                                             )
                                           )
                                   ),
@@ -159,11 +165,8 @@ ui<-dashboardPage(header,
                                   #For UMAP plot tab
                                   tabItem(tabName = "umap",
                                           fluidPage(
-                                            verticalLayout(
-                                              #For gene description table
-                                              mainPanel(tableOutput("table1")), 
-                                              plotOutput("plot3"),
-                                              plotOutput("plot4")
+                                            verticalLayout(plotOutput("plot3"),
+                                                           plotOutput("plot4")
                                             )
                                           )
                                   ),
@@ -171,11 +174,8 @@ ui<-dashboardPage(header,
                                   #For dotplot tab
                                   tabItem(tabName = "dotplot",
                                           fluidPage(
-                                            verticalLayout(
-                                              #For gene description table
-                                              mainPanel(tableOutput("table1")), 
-                                              tags$h6("Note: if you see an error, enter a gene that is not a cell type marker to avoid duplication in dotplot"),
-                                              plotOutput("plot5")
+                                            verticalLayout(tags$h6("Note: if you see an error, enter a gene that is not a cell type marker to avoid duplication in dotplot"),
+                                                           plotOutput("plot5")
                                             )
                                           )
                                   ),
@@ -183,11 +183,8 @@ ui<-dashboardPage(header,
                                   #For table on expression counts
                                   tabItem(tabName = "cellno",
                                           fluidPage(
-                                            verticalLayout(
-                                              #For gene description table
-                                              mainPanel(tableOutput("table1")), 
-                                              br(),
-                                              tableOutput("table2")
+                                            verticalLayout(br(),
+                                                           tableOutput("table2")
                                             )
                                           )
                                   ),
@@ -216,7 +213,26 @@ server<-function(input, output,session)
   
   #* table 1 -Gene Description----
 {
+  
   updateSelectizeInput(session, 'Gene', choices = sort(Gene_desp$hgnc_symbol), server = TRUE)
+  
+
+  #observe({
+  #  print(input$tabs)
+  #3})
+  
+  # if user interacts with gene filter and is not on umap/vlnplot/dotplot page, then take
+  # them to vlnplot, otherwise do not change tab
+  observeEvent(input$Gene, {
+    # if (USER$Logged == TRUE) {
+    if (input$tabs == "home" || input$tabs == "cellno" || input$tabs == "expsum") { 
+      # it requires an ID of sidebarMenu (in this case)
+      #shinyjs::onclick("Gene",  updateTabsetPanel(session, inputId="tabs", selected="vlnplot"))
+      updateTabsetPanel(session, inputId="tabs", selected="vlnplot")
+    }
+  }, ignoreInit = T)
+  
+  
   output$table1<-renderTable({
     req(input$Gene)
     #Gene_desp[toupper(input$Gene),]

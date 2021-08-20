@@ -203,7 +203,8 @@ ui<-dashboardPage(header,
                                   #For table on expression counts
                                   tabItem(tabName = "cellno",
                                           fluidPage(
-                                            verticalLayout(br(),
+                                            verticalLayout(tableOutput("table1_cellno"),
+                                                           br(),
                                                            tableOutput("table2")
                                             )
                                           )
@@ -245,7 +246,7 @@ server<-function(input, output,session)
   # them to vlnplot, otherwise do not change tab
   observeEvent(input$Gene, {
     
-    if (input$tabs == "home" || input$tabs == "cellno" || input$tabs == "expsum") { 
+    if (input$tabs == "home" || input$tabs == "cellno" || input$tabs == "expsum" || input$tabs == "cellno") { 
       # it requires an ID of sidebarMenu (in this case)
       updateTabsetPanel(session, inputId="tabs", selected="vlnplot")
     }
@@ -261,7 +262,8 @@ server<-function(input, output,session)
   
   output$table1_vlnplot <- table1
   output$table1_umap <- table1
-  output$table1_dotplot<- table1
+  output$table1_dotplot <- table1
+  output$table1_cellno <- table1
   
   
   #* plot 1 (Violinplot by Cell types)----

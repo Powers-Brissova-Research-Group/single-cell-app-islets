@@ -57,7 +57,8 @@ header <- dashboardHeader(titleWidth = "100%",
 
 
 #webpage links to the images
-anchor <- tags$header(tags$a(href='https://www.powersbrissovaresearch.org/',
+anchor <- tags$header(
+              tags$a(href='https://www.powersbrissovaresearch.org/',
                              tags$img(src='logo-4.png', height='50', width='220',style="float:left;" )),
                       #style = "padding-top:100px; padding-bottom:100px;"),
                       'Single cell gene expression atlas of human pancreatic islets',
@@ -82,10 +83,10 @@ header$children[[2]]$children <- tags$div(
 
 #*  Dashboard header----
 ui<-dashboardPage(header,
-                  
+                  title = "Single cell gene expression atlas of human pancreatic islets - Powers & Brissova Research Group",
                  skin = "black",
                  #* Dashboard sidebar ----
-                 dashboardSidebar(width = 250,
+                 dashboardSidebar(width = 300,
                                  
                                   sidebarMenu(
                                     id = "tabs",
@@ -110,7 +111,9 @@ ui<-dashboardPage(header,
       dashboardBody(
         useShinyjs(),
         
-        tags$head(tags$style(HTML('
+        tags$head(
+          tags$title("Single cell gene expression atlas of human pancreatic islets"),
+          tags$style(HTML('
                                             /* body */
                                             .content-wrapper, .right-side {
                                             background-color: #FFFFFF;
@@ -230,13 +233,13 @@ server<-function(input, output,session)
   # if user interacts with gene filter and is not on umap/vlnplot/dotplot page, then take
   # them to vlnplot, otherwise do not change tab
   observeEvent(input$Gene, {
-    # if (USER$Logged == TRUE) {
+    
     if (input$tabs == "home" || input$tabs == "cellno" || input$tabs == "expsum") { 
       # it requires an ID of sidebarMenu (in this case)
-      #shinyjs::onclick("Gene",  updateTabsetPanel(session, inputId="tabs", selected="vlnplot"))
       updateTabsetPanel(session, inputId="tabs", selected="vlnplot")
     }
-  }, ignoreInit = T)
+    
+  }, ignoreInit = T) # ignore initial load, since nothing is actually clicked
   
   
   table1 <- renderTable({
@@ -274,7 +277,6 @@ server<-function(input, output,session)
                                        size = 0.8),
             axis.line.y = element_line(color="black",
                                        size = 0.8))
-    
   }, height = 400, width = 750)
   
   

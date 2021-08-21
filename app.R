@@ -38,7 +38,8 @@ load("DATA/Islets2.Rda")
 # idx <- match( rownames(Islets), genemap$hgnc_symbol)
 # Islets_ensembl <- genemap[ idx, ]
 
-Gene_desp<-read.csv("DATA/gene_annotation.csv")
+Gene_desp<-read.csv("DATA/gene_annotation.csv") # not working
+Gene_desp<-read.csv("DATA/biomart_annotation.csv") # working
 
 
 #load experimental summary for table3:

@@ -21,26 +21,8 @@ options(repos = BiocManager::repositories())
 #load data----
 load("DATA/Islets2.Rda")
 
-# #Extract Gene description
-# ref<-read_tsv("DATA/refdata-cellranger-GRCh38-1.2.0/Homo_sapiens.GRCh38.84_gene_annotation_table.txt")
-# 
-# #fetch gene id info from bioomart
-# ensembl = useMart(
-#   "ensembl",
-#   host = "uswest.ensembl.org",
-#   dataset = "hsapiens_gene_ensembl" )
-# genemap <- getBM( attributes = c("ensembl_gene_id",'hgnc_symbol', "description",'gene_biotype', 'chromosome_name', 'start_position', 'end_position','source'),
-#                     filters = "ensembl_gene_id",
-#                     values = ref$gene_id,
-#                     mart = ensembl,
-#                     useCache = FALSE)
-# 
-# idx <- match( rownames(Islets), genemap$hgnc_symbol)
-# Islets_ensembl <- genemap[ idx, ]
-
-Gene_desp<-read.csv("DATA/gene_annotation.csv") # not working
-Gene_desp<-read.csv("DATA/biomart_annotation.csv") # working
-
+# Extract Gene description
+Gene_desp<-read.csv("DATA/gene_annotation_sorted.csv") # working
 
 #load experimental summary for table3:
 t3<-read.csv("DATA/sc meta.csv")
@@ -248,25 +230,29 @@ server<-function(input, output,session)
   
   #* table 1 -Gene Description----
 {
-  
-  updateSelectizeInput(session, 'Gene', choices = sort(Gene_desp$hgnc_symbol), server = TRUE)
-  
-
-  #observe({
-  #  print(input$tabs)
-  #3})
-  
-  # if user interacts with gene filter and is not on umap/vlnplot/dotplot page, then take
-  # them to vlnplot, otherwise do not change tab
-  observeEvent(input$Gene, {
+  observe({
     
-    if (input$tabs == "home" || input$tabs == "cellno" || input$tabs == "expsum" || input$tabs == "cellno") { 
-      # it requires an ID of sidebarMenu (in this case)
-      updateTabsetPanel(session, inputId="tabs", selected="vlnplot")
-    }
-    
-  }, ignoreInit = T) # ignore initial load, since nothing is actually clicked
+    updateSelectizeInput(
+      session, 
+      'Gene',
+      choices = Gene_desp$hgnc_symbol, 
+      server = TRUE,
+      selected=1
+      )
   
+  
+    # if user interacts with gene filter and is not on umap/vlnplot/dotplot page, then take
+    # them to vlnplot, otherwise do not change tab
+    observeEvent(input$Gene, {
+        
+        if (input$tabs == "home" || input$tabs == "cellno" || input$tabs == "expsum" || input$tabs == "cellno") { 
+          # it requires an ID of sidebarMenu (in this case)
+          updateTabsetPanel(session, inputId="tabs", selected="vlnplot")
+        }
+      
+    }, ignoreInit = TRUE) # ignore initial load, since nothing is actually clicked
+  
+  })
   
   table1 <- renderTable({
     req(input$Gene)

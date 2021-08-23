@@ -18,29 +18,12 @@ library(shinyWidgets)
 library(BiocManager)
 options(repos = BiocManager::repositories())
 
-#load data----
+#load data
 load("DATA/Islets2.Rda")
 
-# #Extract Gene description
-# ref<-read_tsv("DATA/refdata-cellranger-GRCh38-1.2.0/Homo_sapiens.GRCh38.84_gene_annotation_table.txt")
-# 
-# #fetch gene id info from bioomart
-# ensembl = useMart(
-#   "ensembl",
-#   host = "uswest.ensembl.org",
-#   dataset = "hsapiens_gene_ensembl" )
-# genemap <- getBM( attributes = c("ensembl_gene_id",'hgnc_symbol', "description",'gene_biotype', 'chromosome_name', 'start_position', 'end_position','source'),
-#                     filters = "ensembl_gene_id",
-#                     values = ref$gene_id,
-#                     mart = ensembl,
-#                     useCache = FALSE)
-# 
-# idx <- match( rownames(Islets), genemap$hgnc_symbol)
-# Islets_ensembl <- genemap[ idx, ]
-
-Gene_desp<-read.csv("DATA/gene_annotation.csv") # not working
-Gene_desp<-read.csv("DATA/biomart_annotation.csv") # working
-
+#load gene annotations
+Gene_desp<-read.csv("DATA/gene_annotation_sorted2.csv")
+#Gene_desp<-read.csv("DATA/biomart_annotation.csv")
 
 #load experimental summary for table3:
 t3<-read.csv("DATA/sc meta.csv")

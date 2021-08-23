@@ -18,11 +18,12 @@ library(shinyWidgets)
 library(BiocManager)
 options(repos = BiocManager::repositories())
 
-#load data----
+#load data
 load("DATA/Islets2.Rda")
 
-# Extract Gene description
-Gene_desp<-read.csv("DATA/gene_annotation_sorted.csv") # working
+#load gene annotations
+Gene_desp<-read.csv("DATA/gene_annotation_sorted2.csv")
+#Gene_desp<-read.csv("DATA/biomart_annotation.csv")
 
 #load experimental summary for table3:
 t3<-read.csv("DATA/sc meta.csv")
@@ -230,29 +231,25 @@ server<-function(input, output,session)
   
   #* table 1 -Gene Description----
 {
-  observe({
+  
+  updateSelectizeInput(session, 'Gene', choices = sort(Gene_desp$hgnc_symbol), server = TRUE)
+  
+
+  #observe({
+  #  print(input$tabs)
+  #3})
+  
+  # if user interacts with gene filter and is not on umap/vlnplot/dotplot page, then take
+  # them to vlnplot, otherwise do not change tab
+  observeEvent(input$Gene, {
     
-    updateSelectizeInput(
-      session, 
-      'Gene',
-      choices = Gene_desp$hgnc_symbol, 
-      server = TRUE,
-      selected=1
-      )
+    if (input$tabs == "home" || input$tabs == "cellno" || input$tabs == "expsum" || input$tabs == "cellno") { 
+      # it requires an ID of sidebarMenu (in this case)
+      updateTabsetPanel(session, inputId="tabs", selected="vlnplot")
+    }
+    
+  }, ignoreInit = T) # ignore initial load, since nothing is actually clicked
   
-  
-    # if user interacts with gene filter and is not on umap/vlnplot/dotplot page, then take
-    # them to vlnplot, otherwise do not change tab
-    observeEvent(input$Gene, {
-        
-        if (input$tabs == "home" || input$tabs == "cellno" || input$tabs == "expsum" || input$tabs == "cellno") { 
-          # it requires an ID of sidebarMenu (in this case)
-          updateTabsetPanel(session, inputId="tabs", selected="vlnplot")
-        }
-      
-    }, ignoreInit = TRUE) # ignore initial load, since nothing is actually clicked
-  
-  })
   
   table1 <- renderTable({
     req(input$Gene)

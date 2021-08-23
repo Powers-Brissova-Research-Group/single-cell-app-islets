@@ -46,16 +46,7 @@ Islets_ensembl$hgnc_symbol <- ifelse(Islets_ensembl$hgnc_symbol == "", "no symbo
 #leave at least one empty hgnc (at least one empty hgnc_symbol helps the app default to home tab but too many empty hgnc_symbol outputs empty dropdown gene list to select)¯\_(ツ)_/¯
 Islets_ensembl$hgnc_symbol<- ifelse(Islets_ensembl$ensembl_gene_id=="ENSG00000273338","",Islets_ensembl$hgnc_symbol)
 
-# and save... as you'd like
-write.csv(Islets_ensembl, "DATA/gene_annotation_sorted.csv",row.names=FALSE)
-
-#Islets_ensembl2<-Islets_ensembl %>% top_n(10000)
-
-#default goes to home tab only when at least one hgnc symbol is empty. so replacing empty symbol with ensembl or any other filler does not work
-Islets_ensembl2$hgnc_symbol <- ifelse(Islets_ensembl2$hgnc_symbol == "", "no symbol available", Islets_ensembl2$hgnc_symbol)
-Islets_ensembl2 <- Islets_ensembl2 %>% arrange(hgnc_symbol)
-Islets_ensembl2$hgnc_symbol<- ifelse(Islets_ensembl2$ensembl_gene_id=="ENSG00000273338","",Islets_ensembl2$hgnc_symbol)
-
+# and save
 write.csv(Islets_ensembl, "DATA/gene_annotation_sorted2.csv",row.names=FALSE)
 
 

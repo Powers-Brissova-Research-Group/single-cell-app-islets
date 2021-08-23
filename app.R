@@ -42,7 +42,7 @@ header <- dashboardHeader(titleWidth = "100%",
 #webpage links to the images
 anchor <- tags$header(
               tags$a(href='https://www.powersbrissovaresearch.org/',
-                             tags$img(src='logo-4.png', width='240',style="float:left; padding:10px 30px;" )),
+                             tags$img(src='logo-4.png', width='240',style="float:left; margin:0 70px 10px 20px;" )),
                       #style = "padding-top:100px; padding-bottom:100px;"),
                       'Single cell gene expression atlas of human pancreatic islets',
                       style = "color: #2b6cb3;
@@ -100,11 +100,11 @@ ui<-dashboardPage(header,
                                             .content-wrapper, .right-side {
                                             background-color: #FFFFFF;
                                             }
+                                            
                                             /* main sidebar */
                                             .skin-blue .main-sidebar { font-size: 20px;
                                                             background-color: #F0F8FF;
                                             }
-
                                             .main-sidebar { font-size: 20px; }
                                             
                                             
@@ -112,10 +112,15 @@ ui<-dashboardPage(header,
                                             	padding-top: 110px;
                                             }
                                             
-                                            #Gene-label { font-size:70%;}
+                                            /* Gene-label { font-size:70%;} */
                                             
-                                            "#image {max-width: 60%; width: 60%; height: auto; }"
+                                            /* image {max-width: 60%; width: 60%; height: auto; } */
                                             
+                                            /* fix for spinner showing up in right of plots in large monitors
+                                            not elegant, but quick fix */
+                                            .loading-spinner { left:25% !important;}
+                                            
+                                            header { padding-top:20px 0 0 0 !important;}
                                             
                                             '))),
                                 

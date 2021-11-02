@@ -1,6 +1,6 @@
 #  Single cell gene expression atlas of human pancreatic islets 
 
-This repository contains R scripts for R shiny web application to browse single cell gene expression data from Shrestha et al., bioRXiv(2021).This expansive dataset contains ~45,000 cells from 5 donor pancreatic islets and provides a comprehensive map of human islet biology. It will be an extremely useful resource that complements existing single cell datasets from human islets. 
+This repository contains R scripts for R shiny web application to browse single cell gene expression data from Shrestha et al., JCI Insight(2021), doi:10.1172/jci.insight.151621.This expansive dataset contains ~45,000 cells from 5 donor pancreatic islets and provides a comprehensive map of human islet biology. It will be an extremely useful resource that complements existing single cell datasets from human islets. 
 
 ## Installation
 

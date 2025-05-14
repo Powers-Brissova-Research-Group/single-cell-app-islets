@@ -1,0 +1,13 @@
+name: scRNAseq-Islets
+title: scRNAseq-Islets
+username: powersbrissovalab
+account: powersbrissovalab
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14204877
+bundleId: 10032798
+url: https://powersbrissovalab.shinyapps.io/scRNAseq-Islets/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .Rprofile|DATA/Islets2.Rda|object/Islets2.Rda.gz.001|object/Islets2.Rda.gz.002|object/Islets2.Rda.gz.003|README.md|sessioninfo.txt|misc

@@ -12,6 +12,7 @@ library(Matrix)
 library(dplyr)
 library(shinydashboard)
 library(shinyWidgets)
+library(shinycssloaders)
 
 # shared app logger (terminal + browser sessions)----
 app_log_callbacks <- list()
@@ -42,6 +43,7 @@ emit_app_log <- function(text) {
 #l ightweight startup data
 Gene_desp <- read.csv("DATA/gene_annotations/gene_annotation_sorted.csv")
 t3 <- read.csv("DATA/sc_meta.csv")
+colnames(t3) <- c("Attribute", "Value")
 
 # load Seurat object at startup
 emit_app_log("Loading Islets object...")
@@ -160,12 +162,12 @@ ui<-dashboardPage(header,
                                            )
                                        ),
 
-                                       menuItem("Violinplot", tabName = "vlnplot", icon = icon("vp")),
-                                       menuItem("Umap", tabName = "umap", icon = icon("ump")),
-                                        menuItem("Dotplot", tabName = "dotplot", icon = icon("dp")),
-                                        menuItem("Expression values", tabName = "cellno", icon = icon("cellno")),
-                                        menuItem("Manuscript", icon = icon("Manuscript"), href ="https://insight.jci.org/articles/view/151621"),
-                                        menuItem("Experimental Summary", tabName = "expsum", icon = icon("ES"))
+                                       menuItem("Violin plot", tabName = "vlnplot"),
+                                       menuItem("UMAP plot", tabName = "umap"),
+                                        menuItem("Dot plot", tabName = "dotplot"),
+                                        menuItem("Expression table", tabName = "cellno"),
+                                        menuItem("Experimental summary", tabName = "expsum"),
+                                        menuItem("Manuscript", href ="https://insight.jci.org/articles/view/151621")
                                     )
                   ),
 
@@ -259,14 +261,21 @@ ui<-dashboardPage(header,
                           tabItem(tabName = "vlnplot",
                                   fluidRow(
                                       column(9,
-                                          addSpinner(plotOutput("plot1", height = "auto"), spin = "dots", color = "#2b6cb3"),
-                                          plotOutput("plot2", height = "auto")
+                                          withSpinner(plotOutput("plot1", height = "auto"), type = 8, color = "#2b6cb3"),
+                                          withSpinner(plotOutput("plot2", height = "auto"), type = 8, color = "#2b6cb3"),
+                                          br(),
+                                          tags$p(style = "font-size:14px; color:#555;",
+                                              "Violin plots show the distribution of gene expression across cell types (top) and donor age groups (bottom).",
+                                              "Normalized expression counts are", tags$code("ln(UMI-per-10,000 + 1)"), ".",
+                                              "The width of each violin represents the density of cells at a given expression level.",
+                                              "Use the sidebar to optionally overlay boxplots (showing median and quartiles) or individual cells."
+                                          )
                                       ),
                                       column(3,
                                           wellPanel(
                                               tags$h4("Plot Options"),
-                                              sliderInput("VlnHeight", "Plot height (px):", min = 300, max = 800, value = 400, step = 50),
-                                              sliderInput("VlnWidth", "Plot width (px):", min = 400, max = 1000, value = 800, step = 50),
+                                              sliderInput("VlnHeight", "Plot height (px):", min = 300, max = 800, value = 350, step = 50),
+                                              sliderInput("VlnWidth", "Plot width (px):", min = 400, max = 1000, value = 700, step = 50),
                                               hr(),
                                               checkboxInput("ShowBoxplot", "Show boxplot", value = TRUE),
                                               checkboxInput("ShowDots", "Show individual cells (slower to render)", value = FALSE),
@@ -282,7 +291,7 @@ ui<-dashboardPage(header,
                                           ),
                                           wellPanel(
                                               tags$h4("Gene Info"),
-                                              tableOutput("geneinfo_vlnplot")
+                                              uiOutput("geneinfo_vlnplot")
                                           )
                                       )
                                   )
@@ -292,13 +301,20 @@ ui<-dashboardPage(header,
                           tabItem(tabName = "umap",
                                   fluidRow(
                                       column(9,
-                                          addSpinner(plotOutput("plot3", width = "auto", height = "auto"), spin = "dots", color = "#2b6cb3"),
-                                          addSpinner(plotOutput("plot4", width = "auto", height = "auto"), spin = "dots", color = "#2b6cb3")
+                                          withSpinner(plotOutput("plot4", width = "auto", height = "auto"), type = 8, color = "#2b6cb3"),
+                                          withSpinner(plotOutput("plot3", width = "auto", height = "auto"), type = 8, color = "#2b6cb3"),
+                                          br(),
+                                          tags$p(style = "font-size:14px; color:#555;",
+                                              "UMAP (Uniform Manifold Approximation and Projection) plots to visualize single cells in two dimensions, where nearby cells have similar transcriptional profiles.",
+                                              "The top plot shows expression of the selected gene, with color intensity indicating expression level.",
+                                              "The bottom plot shows cells colored by cell type identity.",
+                                              "Use the sidebar to adjust point size, plot size, color scheme, and toggle cell type labels."
+                                          )
                                       ),
                                       column(3,
                                           wellPanel(
                                               tags$h4("Plot Options"),
-                                              sliderInput("UmapSize", "Plot size (px):", min = 300, max = 1500, value = 800, step = 100),
+                                              sliderInput("UmapSize", "Plot size (px):", min = 300, max = 1500, value = 700, step = 100),
                                               sliderInput("UmapPtSize", "Point size:", min = 0.1, max = 3, value = 1, step = 0.1),
                                               selectInput("UmapColorScheme", "Color scheme (feature plot):",
                                                           choices = c("Grey-Red" = "greyred",
@@ -307,11 +323,13 @@ ui<-dashboardPage(header,
                                                                       "Inferno" = "inferno",
                                                                       "Plasma" = "plasma",
                                                                       "Cividis" = "cividis"),
-                                                          selected = "greyred")
+                                                          selected = "greyred"),
+                                              checkboxInput("UmapLabels", "Show cell type labels", value = TRUE),
+                                              checkboxInput("UmapOrder", "Plot expressing cells on top", value = TRUE)
                                           ),
                                           wellPanel(
                                               tags$h4("Gene Info"),
-                                              tableOutput("geneinfo_umap")
+                                              uiOutput("geneinfo_umap")
                                           )
                                       )
                                   )
@@ -321,16 +339,31 @@ ui<-dashboardPage(header,
                           tabItem(tabName = "dotplot",
                                   fluidRow(
                                       column(9,
-                                          addSpinner(plotOutput("plot5", height = "auto"), spin = "dots", color = "#2b6cb3")
+                                          withSpinner(plotOutput("plot5", height = "auto"), type = 8, color = "#2b6cb3"),
+                                          br(),
+                                          tags$p(style = "font-size:14px; color:#555;",
+                                              "The dotplot shows your gene of interest (highlighted in yellow) alongside a curated set of known cell type marker genes:",
+                                              tags$b("GCG"), "(Alpha),",
+                                              tags$b("INS"), "(Beta),",
+                                              tags$b("SST"), "(Delta),",
+                                              tags$b("PPY"), "(Gamma),",
+                                              tags$b("GHRL"), "(Epsilon),",
+                                              tags$b("PRSS1"), "(Acinar),",
+                                              tags$b("KRT19"), "(Ductal),",
+                                              tags$b("PECAM1"), "(Endothelial),",
+                                              tags$b("PDGFRB"), "(Stellate),",
+                                              tags$b("HLA-DRA"), "(Immune).",
+                                              "Dot size represents the percentage of cells expressing the gene; color intensity indicates the mean expression z-score."
+                                          )
                                       ),
                                       column(3,
                                           wellPanel(
                                               tags$h4("Plot Options"),
-                                              sliderInput("DotSize", "Plot size (px):", min = 400, max = 1200, value = 800, step = 50)
+                                              sliderInput("DotSize", "Plot size (px):", min = 400, max = 1200, value = 700, step = 50)
                                           ),
                                           wellPanel(
                                               tags$h4("Gene Info"),
-                                              tableOutput("geneinfo_dotplot")
+                                              uiOutput("geneinfo_dotplot")
                                           )
                                       )
                                   )
@@ -340,16 +373,24 @@ ui<-dashboardPage(header,
                           tabItem(tabName = "cellno",
                                   fluidRow(
                                       column(9,
-                                          DT::dataTableOutput("table2")
+                                          withSpinner(DT::dataTableOutput("table2"), type = 8, color = "#2b6cb3"),
+                                          br(),
+                                          tags$p(style = "font-size:14px; color:#555;",
+                                              "Expression values for the selected gene across all cell types.",
+                                              "Columns show the percentage of cells expressing the gene, mean expression z-score, and average expression.",
+                                              "Columns are sorted by z-score (descending) by default.",
+                                              "Use the sidebar to adjust decimal precision."
+                                          )
                                       ),
                                       column(3,
                                           wellPanel(
                                               tags$h4("Table Options"),
-                                              sliderInput("DecimalPoints", "Decimal places:", min = 0, max = 10, value = 2, step = 1)
+                                              sliderInput("DecimalPoints", "Decimal places:", min = 0, max = 10, value = 2, step = 1),
+                                              checkboxInput("TableColors", "Color-code values", value = TRUE)
                                           ),
                                           wellPanel(
                                               tags$h4("Gene Info"),
-                                              tableOutput("geneinfo_cellno")
+                                              uiOutput("geneinfo_cellno")
                                           )
                                       )
                                   )
@@ -364,7 +405,7 @@ ui<-dashboardPage(header,
                                   fluidPage(
                                       verticalLayout(br(),
                                                      tags$h3(HTML(paste0("<b>","Single Cell RNA-seq Metadata","</b>")) ),
-                                                     tableOutput("table3"),
+                                                     DT::dataTableOutput("table3"),
                                                      tags$h6("Metadata format standardized according to",tags$a(href='https://www.nature.com/articles/s41587-020-00744-z',"Fullgrabe et al.,2020"))
 
                                       )
@@ -423,17 +464,35 @@ server<-function(input, output,session)
 
     })
 
-    gene_info_transposed <- reactive({
+    gene_info_html <- reactive({
         req(input$Gene)
         row <- Gene_desp %>% filter(hgnc_symbol == input$Gene)
-        if (nrow(row) == 0) return(data.frame(Field = character(), Value = character()))
-        data.frame(Field = names(row), Value = unlist(row[1, ], use.names = FALSE))
+        if (nrow(row) == 0) return(NULL)
+        description <- gsub("\\s*\\[.*\\]\\s*$", "", row$description)
+        loc_str <- paste0("chr", row$chromosome_name, ":", row$start_position, "-", row$end_position)
+        ucsc_url <- paste0("https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr",
+                           row$chromosome_name, "%3A", row$start_position, "-", row$end_position)
+        ensembl_url <- paste0("https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=", row$ensembl_gene_id)
+        info <- list(
+            list("Symbol", row$hgnc_symbol),
+            list("Description", description),
+            list("Biotype", row$gene_biotype),
+            list("Location (hg38)", tags$a(href = ucsc_url, target = "_blank", loc_str)),
+            list("Ensembl ID", tags$a(href = ensembl_url, target = "_blank", row$ensembl_gene_id))
+        )
+        rows <- lapply(info, function(x) {
+            tags$tr(
+                tags$td(style = "padding: 4px 8px; font-weight: bold; white-space: nowrap; vertical-align: top;", x[[1]]),
+                tags$td(style = "padding: 4px 8px;", x[[2]])
+            )
+        })
+        tags$table(style = "width: 100%; font-size: 13px;", do.call(tagList, rows))
     })
 
-    output$geneinfo_vlnplot <- renderTable({ gene_info_transposed() }, colnames = FALSE)
-    output$geneinfo_umap <- renderTable({ gene_info_transposed() }, colnames = FALSE)
-    output$geneinfo_dotplot <- renderTable({ gene_info_transposed() }, colnames = FALSE)
-    output$geneinfo_cellno <- renderTable({ gene_info_transposed() }, colnames = FALSE)
+    output$geneinfo_vlnplot <- renderUI({ gene_info_html() })
+    output$geneinfo_umap <- renderUI({ gene_info_html() })
+    output$geneinfo_dotplot <- renderUI({ gene_info_html() })
+    output$geneinfo_cellno <- renderUI({ gene_info_html() })
 
     #* plot 1 (Violinplot by Cell types)
     output$plot1 <- renderPlot({
@@ -446,7 +505,7 @@ server<-function(input, output,session)
         p <- ggplot(celltype_data, aes(x = celltypes, y = celltype_data[,1], fill = celltypes)) +
             geom_violin(trim = T, alpha = 1, width =1, size=1, scale="width") +
             theme_minimal()+
-            labs(x="", y= "ln(UMI -per-10,000 +1)", title = toupper(input$Gene))+
+            labs(x="", y= "Normalized expression counts", title = toupper(input$Gene))+
             { if (input$ShowDots) geom_jitter(width = 0.2, size = input$Cellsize, alpha = 0.6, height = 0) } +
             { if (input$ShowBoxplot) geom_boxplot(width = 0.1,size=1, outlier.shape = NA, alpha = 0, na.rm = TRUE, position = position_dodge(width = 1), color = "#5A5A5A") } +
             scale_fill_manual(values = c('Alpha'='#F8766D','Beta'='#39B600','Delta'='#D89000','Gamma'='#A3A500','Epsilon'='#00BF7D','Acinar'='#00BFC4','Ductal'='#00B0F6','Endothelial'='#9590FF','Stellate'='#E76BF3','Immune'='#FF62BC'))+
@@ -472,7 +531,7 @@ server<-function(input, output,session)
         p <- ggplot(age_data, aes(x = age, y = age_data[,1], fill = age)) +
             geom_violin(trim = T, alpha = 0.7, width =1, size=1, scale="area") +
             theme_minimal()+
-            labs(x="", y= "ln(UMI -per-10,000 +1)", title = toupper(input$Gene))+
+            labs(x="", y= "Normalized expression counts", title = toupper(input$Gene))+
             { if (input$ShowDots) geom_jitter(width = 0.2, size = input$Cellsize, alpha = 0.6, height = 0) } +
             { if (input$ShowBoxplot) geom_boxplot(width = 0.1,size=1, outlier.shape = NA, alpha = 0, na.rm = TRUE, position = position_dodge(width = 1), color = "#5A5A5A") } +
             scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"))+
@@ -492,7 +551,7 @@ server<-function(input, output,session)
         emit_app_log("Rendering UMAP (cell types)")
         elapsed <- system.time({
             islets <- islets_cache()
-            p <- DimPlot(islets, reduction = "umap", label = TRUE, pt.size = input$UmapPtSize,
+            p <- DimPlot(islets, reduction = "umap", label = FALSE, pt.size = input$UmapPtSize,
                           cols = c('Alpha' = '#F8766D', 'Beta' = '#39B600', 'Delta' = '#D89000',
                                    'Gamma' = '#A3A500', 'Epsilon' = '#00BF7D', 'Acinar' = '#00BFC4',
                                    'Ductal' = '#00B0F6', 'Endothelial' = '#9590FF',
@@ -503,6 +562,17 @@ server<-function(input, output,session)
                       axis.text = element_text(size = 18, face = "bold"),
                       axis.line.x = element_line(color = "black", size = 0.8),
                       axis.line.y = element_line(color = "black", size = 0.8))
+            if (input$UmapLabels) {
+                umap_coords <- as.data.frame(Embeddings(islets, reduction = "umap"))
+                umap_coords$CellType <- islets$CellTypes
+                label_df <- umap_coords %>%
+                    group_by(CellType) %>%
+                    summarise(x = median(.data[[colnames(umap_coords)[1]]]),
+                              y = median(.data[[colnames(umap_coords)[2]]]), .groups = "drop")
+                p <- p + annotate("label", x = label_df$x, y = label_df$y, label = label_df$CellType,
+                                  fontface = "bold", size = 4.5, fill = "white", alpha = 0.7,
+                                  label.r = unit(0.15, "lines"), label.size = 0)
+            }
         })
         emit_app_log(sprintf("UMAP (cell types) done in %.2fs", elapsed[["elapsed"]]))
         p
@@ -517,13 +587,25 @@ server<-function(input, output,session)
         islets <- islets_cache()
         color_scheme <- input$UmapColorScheme
         p <- FeaturePlot(islets, features = toupper(input$Gene), pt.size = input$UmapPtSize,
-                         cols = c("lightgrey", "red")) +
+                         cols = c("lightgrey", "red"), order = input$UmapOrder) +
             coord_fixed(ratio = 1) +
             { if (color_scheme != "greyred") scale_color_viridis_c(option = color_scheme) } +
             theme(text = element_text(size = 18,face="bold"),
                   axis.text = element_text(size = 18,face="bold"),
                   axis.line.x = element_line(color="black", size = 0.8),
                   axis.line.y = element_line(color="black", size = 0.8))
+        # add cell type labels
+        if (input$UmapLabels) {
+            umap_coords <- as.data.frame(Embeddings(islets, reduction = "umap"))
+            umap_coords$CellType <- islets$CellTypes
+            label_df <- umap_coords %>%
+                group_by(CellType) %>%
+                summarise(x = median(.data[[colnames(umap_coords)[1]]]),
+                          y = median(.data[[colnames(umap_coords)[2]]]), .groups = "drop")
+            p <- p + annotate("label", x = label_df$x, y = label_df$y, label = label_df$CellType,
+                              fontface = "bold", size = 4.5, fill = "white", alpha = 0.7,
+                              label.r = unit(0.15, "lines"), label.size = 0)
+        }
         })
         emit_app_log(sprintf("UMAP (feature) for %s done in %.2fs", toupper(input$Gene), elapsed[["elapsed"]]))
         p
@@ -538,8 +620,11 @@ server<-function(input, output,session)
         emit_app_log(sprintf("Rendering dotplot for %s", toupper(input$Gene)))
         elapsed <- system.time({
         islets <- islets_cache()
-        selected_markers <- Known.markers[!(Known.markers %in% input$Gene)]
-        p <- DotPlot(islets, feature=c(selected_markers,toupper(input$Gene)), dot.scale = 8)+
+        all_genes <- unique(c(Known.markers, toupper(input$Gene)))
+        gene_pos <- which(all_genes == toupper(input$Gene))
+        p <- DotPlot(islets, feature=all_genes, dot.scale = 8)+
+            annotate("rect", xmin = gene_pos - 0.5, xmax = gene_pos + 0.5,
+                     ymin = -Inf, ymax = Inf, fill = "yellow", alpha = 0.15) +
             coord_flip()+
             scale_color_gradient2(low = "blue", high = "red",mid = "white")+
             labs(y="", x="Genes")+RotatedAxis()+
@@ -560,6 +645,7 @@ server<-function(input, output,session)
     output$table2 <- DT::renderDataTable({
         req(input$Gene)
         dp <- input$DecimalPoints
+        use_colors <- input$TableColors
         emit_app_log(sprintf("Rendering expression values table for %s", toupper(input$Gene)))
         elapsed <- system.time({
         tble <- get_gene_dotplot_data(input$Gene)
@@ -573,13 +659,40 @@ server<-function(input, output,session)
         tble <- tble %>% mutate(across(where(is.numeric), ~round(.x, dp)))
         })
         emit_app_log(sprintf("Expression values table for %s done in %.2fs", toupper(input$Gene), elapsed[["elapsed"]]))
-        tble
+
+        zscore_col <- which(names(tble) == 'Mean expression z-score') - 1
+        dt <- DT::datatable(tble, options = list(dom = 't', order = list(list(zscore_col, 'desc'))), rownames = FALSE)
+        if (use_colors) {
+            pct_max <- max(tble[['% Cells expressed']], na.rm = TRUE)
+            avg_max <- max(tble[['Average expression']], na.rm = TRUE)
+            dt <- dt %>%
+                DT::formatStyle('% Cells expressed',
+                    backgroundColor = DT::styleInterval(
+                        seq(0, max(1, pct_max), length.out = 100),
+                        paste0("rgba(255, 0, 0, ", round(seq(0, 0.4, length.out = 101), 3), ")")
+                    )) %>%
+                DT::formatStyle('Average expression',
+                    backgroundColor = DT::styleInterval(
+                        seq(0, max(1, avg_max), length.out = 100),
+                        paste0("rgba(255, 0, 0, ", round(seq(0, 0.4, length.out = 101), 3), ")")
+                    )) %>%
+                DT::formatStyle('Mean expression z-score',
+                    backgroundColor = DT::styleInterval(
+                        seq(-3, 3, length.out = 100),
+                        c("rgba(0, 0, 255, 0.4)",
+                          sapply(seq(-3, 3, length.out = 100), function(x) {
+                              if (x < 0) paste0("rgba(0, 0, 255, ", round(abs(x)/3 * 0.4, 3), ")")
+                              else paste0("rgba(255, 0, 0, ", round(x/3 * 0.4, 3), ")")
+                          }))
+                    ))
+        }
+        dt
     })
 
 
     #* Table3 (Experimental Summary) ----
-    output$table3 <- renderTable({
-        t3
+    output$table3 <- DT::renderDataTable({
+        DT::datatable(t3, options = list(dom = 't', ordering = FALSE, pageLength = nrow(t3)), rownames = FALSE)
     })
 }
 

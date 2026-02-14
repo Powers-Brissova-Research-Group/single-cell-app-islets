@@ -1,10 +1,10 @@
 Organism,Homo sapiens
 Tissue,Isolated pancreatic islets
-Age,14-66years
+Age,14-66 years
 Donor,5
 Sex,M/F
 Disease status,Healthy
-Tissue dissociation,Manual pipetting using 0.025% trypsin 
+Tissue dissociation,Manual pipetting using 0.025% trypsin
 Cell enrichment,None
 Single cell Isolation,"Droplet-based cell isolation, 10X Chromium"
 Single cell entity,Whole cell

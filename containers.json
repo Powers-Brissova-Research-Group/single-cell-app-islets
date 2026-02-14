@@ -1,0 +1,8 @@
+{
+  "islets-shiny": {
+    "image": "016004279847.dkr.ecr.us-east-1.amazonaws.com/islets-shiny:latest",
+    "ports": {
+      "3838": "HTTP"
+    }
+  }
+}

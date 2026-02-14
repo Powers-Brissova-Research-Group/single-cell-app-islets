@@ -1,0 +1,12 @@
+{
+    "containerName": "islets-shiny",
+    "containerPort": 3838,
+    "healthCheck": {
+        "path": "/",
+        "intervalSeconds": 60,
+        "timeoutSeconds": 10,
+        "healthyThreshold": 5,
+        "unhealthyThreshold": 10,
+        "successCodes": "200-499"
+    }
+}

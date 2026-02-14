@@ -183,8 +183,6 @@ docker build -t islets-shiny .
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 echo ${AWS_ACCOUNT_ID}
 
-# Create ECR repository
-aws ecr create-repository --repository-name islets-shiny --region us-east-1
 
 # Login to ECR
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
@@ -196,9 +194,9 @@ docker tag islets-shiny:latest ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
 docker push ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/islets-shiny:latest
 
 # Enable private registry access for Lightsail
-aws lightsail update-container-service \
-  --service-name islets-app \
-  --private-registry-access '{"ecrImagePullerRole":{"isActive":true}}'
+#aws lightsail update-container-service \
+#  --service-name islets-app \
+#  --private-registry-access '{"ecrImagePullerRole":{"isActive":true}}'
 
 # 3. Update containers.json with new version number (e.g., .2, .3, etc.)
 
@@ -207,6 +205,7 @@ aws lightsail create-container-service-deployment \
   --service-name islets-app \
   --containers file://containers.json \
   --public-endpoint file://public-endpoint.json
+
 ```
 
 

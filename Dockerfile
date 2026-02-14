@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install R packages
 RUN R -e "install.packages(c('shiny', 'shinyjs', 'Seurat', 'ggplot2', 'Matrix', \
-    'dplyr', 'shinydashboard', 'shinyWidgets', 'DT'), repos='https://cloud.r-project.org/')"
+    'dplyr', 'shinydashboard', 'shinyWidgets', 'DT', 'shinycssloaders'), repos='https://cloud.r-project.org/')"
 
 # Copy app files
 WORKDIR /srv/shiny-server
